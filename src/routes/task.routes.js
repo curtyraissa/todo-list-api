@@ -3,10 +3,10 @@ import {changeTaskStatus, createTask, deleteTask, editTask, getTasks } from "../
 
 const taskRouter = Router()
 
-taskRouter.post("/tasks", createTask)
+taskRouter.post("/tasks", validadeSchema(taskSchema), createTask)
 taskRouter.get("/tasks", getTasks)
 taskRouter.patch("/tasks/status/:id", changeTaskStatus)
 taskRouter.delete("/tasks/:id", deleteTask)
-taskRouter.put("/tasks/:id", editTask)
+taskRouter.put("/tasks/:id", validadeSchema(taskSchema), editTask)
 
 export default taskRouter
