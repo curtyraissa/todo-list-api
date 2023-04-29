@@ -1,6 +1,7 @@
 import dayjs from "dayjs"
 import { db } from "../database/database.config.js"
 import customParseFormat from "dayjs/plugin/customParseFormat"
+import { ObjectId } from "mongodb"
 dayjs.extend(customParseFormat)
 
 export async function createTask(req, res){
@@ -28,8 +29,15 @@ export async function getTasks(req, res){
 }
 
 export async function changeTaskStatus(req, res){
+    const {id} = req.params
     try {
+        const task = await db.collection("tasks").findOne({_id: new ObjectId(id)})
+        if (!task) return res.sendStatus(404)
 
+        await db.collection("tasks").updateOne(
+            {_id: new ObjectId(id)},
+            {$set: {done: !task.done}}
+        )
     } catch (err) {
         res.status(500).send(err.message)
     }
