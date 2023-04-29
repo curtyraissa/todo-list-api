@@ -52,8 +52,15 @@ export async function deleteTask(req, res){
 }
 
 export async function editTask(req, res){
+    const {id} = req.params
+    const {description} = req.body
     try {
-
+       const task = await db.collection("tasks").updateOne(
+            {_id: new ObjectId(id)},
+            {$set: {description}}
+        )
+        if(task.matchedCount === 0) return res.sendStatus(404)
+        res.sendStatus(200)
     } catch (err) {
         res.status(500).send(err.message)
     }
