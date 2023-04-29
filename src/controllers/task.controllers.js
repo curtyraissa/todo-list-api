@@ -1,5 +1,7 @@
 import dayjs from "dayjs"
 import { db } from "../database/database.config.js"
+import customParseFormat from "dayjs/plugin/customParseFormat"
+dayjs.extend(customParseFormat)
 
 export async function createTask(req, res){
     const {description} = req.body
@@ -13,8 +15,13 @@ export async function createTask(req, res){
 }
 
 export async function getTasks(req, res){
+    const {filterDate} = req.body
+    const timestamp = dayjs(filterDate, "DD-MM-YYYY").valueOf()
     try {
-
+        const tasks = await db.collection("tasks")
+        .find({date:{$gte:timestamp || 0}})
+        .toArray()
+        res.status(200).send(tasks)
     } catch (err) {
         res.status(500).send(err.message)
     }
