@@ -44,8 +44,11 @@ export async function changeTaskStatus(req, res){
 }
 
 export async function deleteTask(req, res){
+    const {id} = req.params
     try {
-
+        await db.collection("tasks").deleteOne({_id: new ObjectId(id)})
+        if(task.deletedCount === 0) return res.sendStatus(404)
+        res.sendStatus(200)
     } catch (err) {
         res.status(500).send(err.message)
     }
