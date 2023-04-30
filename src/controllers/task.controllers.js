@@ -6,8 +6,9 @@ dayjs.extend(customParseFormat)
 
 export async function createTask(req, res){
     const {description} = req.body
+    const userId = res.locals.session.userId
     try {
-        const task = {description, date: dayjs().valueOf(), done:false}
+        const task = {description, date: dayjs().valueOf(), done:false, userId}
         await db.collection("tasks").insertOne(task)
         res.sendStatus(201)
     } catch (err) {
@@ -18,9 +19,10 @@ export async function createTask(req, res){
 export async function getTasks(req, res){
     const {filterDate} = req.body
     const timestamp = dayjs(filterDate, "DD-MM-YYYY").valueOf()
+    const userId = res.locals.session.userId
     try {
         const tasks = await db.collection("tasks")
-        .find({date:{$gte:timestamp || 0}})
+        .find({userId, date:{$gte:timestamp || 0}})
         .toArray()
         res.status(200).send(tasks)
     } catch (err) {
@@ -30,8 +32,9 @@ export async function getTasks(req, res){
 
 export async function changeTaskStatus(req, res){
     const {id} = req.params
+    const userId = res.locals.session.userId
     try {
-        const task = await db.collection("tasks").findOne({_id: new ObjectId(id)})
+        const task = await db.collection("tasks").findOne({_id: new ObjectId(id), userId})
         if (!task) return res.sendStatus(404)
 
         await db.collection("tasks").updateOne(
@@ -45,8 +48,9 @@ export async function changeTaskStatus(req, res){
 
 export async function deleteTask(req, res){
     const {id} = req.params
+    const userId = res.locals.session.userId
     try {
-        await db.collection("tasks").deleteOne({_id: new ObjectId(id)})
+        await db.collection("tasks").deleteOne({_id: new ObjectId(id), userId})
         if(task.deletedCount === 0) return res.sendStatus(404)
         res.sendStatus(200)
     } catch (err) {
@@ -57,10 +61,11 @@ export async function deleteTask(req, res){
 export async function editTask(req, res){
     const {id} = req.params
     const {description} = req.body
+    const userId = res.locals.session.userId
 
     try {
        const task = await db.collection("tasks").updateOne(
-            {_id: new ObjectId(id)},
+            {_id: new ObjectId(id), userId},
             {$set: {description}}
         )
         if(task.matchedCount === 0) return res.sendStatus(404)

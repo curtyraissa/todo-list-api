@@ -8,7 +8,7 @@ const app = express()
 // Configurações
 app.use(express.json())
 app.use(cors())
-app.use(taskRouter)
+app.use(router)
 
 // Deixa o app escutando, à espera de requisições
 const PORT = 5000
